@@ -1,6 +1,6 @@
 import { generateToken } from "@/lib/jwt"
 import { connectDB } from "@/lib/mongodb"
-import userModel from "@/models/user.model"
+import userModel from "@/models/User.model"
 import { LoginBody } from "@/types/user.types"
 import { NextRequest, NextResponse } from "next/server"
 
@@ -66,6 +66,8 @@ export async function POST(req: NextRequest){
             sameSite: 'lax',
             maxAge: 60 * 60 * 1000
         })
+
+        return response
     }catch(error){
         console.log("error in register api",error)
         return NextResponse.json<ApiResponse>({
