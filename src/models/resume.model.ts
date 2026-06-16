@@ -1,80 +1,81 @@
 import { IResume } from "@/types/resume.types";
-import mongoose from "mongoose";
+import mongoose, { mongo } from "mongoose";
 
-
-const resumeSchema = new mongoose.Schema<IResume>({
-    user_id:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: true
+const resumeSchema = new mongoose.Schema<IResume>(
+  {
+    user_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
     },
-    title:{
-        type: String,
-        default: ""
+    title: {
+      type: String,
+      default: "",
     },
-    summary:{
-        type:String,
-        default: ""
+    summary: {
+      type: String,
+      default: "",
     },
-    personalInfo:{
-        type: {
-            fullname: String,
-            email: String,
-            mobile: String,
-            location: String,
-            github: String,
-            linkedIn: String,
-            portfolio: String
+    personalInfo: {
+      type: {
+        fullname: String,
+        email: String,
+        mobile: String,
+        location: String,
+        github: String,
+        portfolio: String,
+      },
+      default: {},
+    },
+    education: {
+      type: [
+        {
+          institute: String,
+          degree: String,
+          startDate: String,
+          endDate: String,
         },
-        default: {}
+      ],
+      default: [],
     },
-    education:{
-        type:[
-            {
-                institute: String,
-                degree: String,
-                startDate: String,
-                endDate: String
-            }
-        ],
-        default:[]
-    },
-    workExperience:{
-        type: [
-            {
-                company: String,
-                position: String,
-                startDate: String,
-                endDate: String,
-                description: String
-            }
-        ],
-        default :[]
+    workExperience: {
+      type: [
+        {
+          company: String,
+          position: String,
+          startDate: String,
+          endDate: String,
+          description: String,
+        },
+      ],
+      default: [],
     },
     projects: {
-        type:[
-            {
-                title: String,
-                description: String,
-                techStack: [String],
-                githubUrl: String,
-                liveUrl: String
-            }
-        ],
-        default : []
+      type: [
+        {
+          title: String,
+          description: String,
+          techStack: [String],
+          githubUrl: String,
+          liveUrl: String,
+        },
+      ],
+      default: [],
     },
-    skills:{
-        type:[String],
-        default: []
+    skills: {
+      type: [String],
+      default: [],
     },
-    certification: {
-        type: [String],
-        default : []
-    }
-},{
-    timestamps: true
-})
+    certifications: {
+      type: [String],
+      default: [],
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const resumeModel = mongoose.model('Resume', resumeSchema)
-
-export default resumeModel
+const ResumeModel =
+  mongoose.models.Resume || mongoose.model("Resume", resumeSchema);
+export default ResumeModel;

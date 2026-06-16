@@ -1,74 +1,83 @@
 import { generateAiContent } from "@/lib/gemini";
-import { GenerateExperienceDescription, GenerateProjectDescription } from "@/types/ai.types"
-import { ApiResponse } from "@/types/api.types"
-import { NextRequest, NextResponse } from "next/server"
-import { describe } from "node:test";
-
+import { GenerateExperienceDescriptionBody } from "@/types/ai.types";
+import { ApiResponse } from "@/types/api.types";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
     try {
+        const body: GenerateExperienceDescriptionBody = await req.json();
 
-        const body: GenerateExperienceDescription = await req.json()
+        const { experienceLevel, yearsOfExperience, techStack, jobRole } = body;
 
-        const {experienceLevel,yearOfExperience, jobRole, techStack} = body;
-
-        if (!experienceLevel || !techStack || !jobRole || !yearOfExperience) {
+        if (!experienceLevel || !jobRole || !techStack)
             return NextResponse.json<ApiResponse>({
-                success: false,
-                message: "Missing fields..",
-            }, {
-                status: 400
-            })
-        }
+                success: false, message: "Missing fields"
+            }, { status: 400 });
 
-       const prompt = `
-You are an expert ATS resume writer and senior software engineering career coach.
+        const prompt = `
+            You are an expert resume writer, ATS optimization specialist, and technical recruiter.
+            
+            Generate a professional ATS-friendly work experience description based on the details below.
+            
+            Job Role:
+            ${jobRole}
+            
+            Experience Level:
+            ${experienceLevel}
+            
+            Years of Experience:
+            ${yearsOfExperience}
+            j
+            Tech Stack:
+            ${techStack}
+            
+            Rules:
+            
+            1. Generate ONLY the work experience description.
+            2. Do NOT generate company names, dates, locations, headings, titles, labels, bullet points, numbering, or explanations.
+            3. The description must be between 80 and 150 words.
+            4. Write in a professional resume style optimized for ATS systems.
+            5. Naturally incorporate the technologies from the provided tech stack.
+            6. Describe realistic responsibilities, technical contributions, and achievements expected from someone with the specified role and years of experience.
+            7. Use strong action verbs such as Developed, Designed, Implemented, Built, Integrated, Optimized, Automated, Collaborated, Engineered, and Maintained.
+            8. Highlight technical problem-solving, performance improvements, scalability, system reliability, code quality, and business impact where appropriate.
+            9. Do NOT use first-person pronouns such as "I", "me", or "my".
+            10. Avoid generic phrases, buzzwords, and filler content.
+            11. Adapt the complexity of responsibilities according to the experience level and years of experience:
+                - Fresher (0-1 years): Focus on internships, training, debugging, feature implementation, and learning.
+                - Junior (1-3 years): Focus on feature development, API integration, bug fixing, testing, and collaboration.
+                - Mid-Level (3-6 years): Focus on ownership of modules, performance optimization, architecture decisions, and mentoring junior developers.
+                - Senior (6+ years): Focus on system design, technical leadership, scalability, architecture, code reviews, and strategic technical decisions.
+            12. Include ATS-friendly keywords relevant to the provided role.
+            13. Make the description realistic and suitable for a professional resume.
+            14. Return plain text only.
+            15. Do not mention years of experience directly in the output unless it fits naturally within the description.
+            
+            Output:
+            Return ONLY the work experience description text.
+            `;
 
-TASK:
-Generate a professional work experience description for a resume based on the given input.
+        const result = await generateAiContent(prompt);
 
-RULES:
-- Output ONLY the work experience content.
-- Do NOT include headings, titles, or markdown.
-- Do NOT invent company names or fake achievements.
-- Keep tone professional, realistic, and ATS-optimized.
-- Use strong action verbs (developed, built, designed, implemented, optimized, maintained).
-- Naturally include the given tech stack keywords.
-- Match responsibility level based on experience level and years of experience.
-- Output can be a single paragraph OR 3–5 bullet points (choose the best format for clarity).
-- Keep content realistic based on years of experience.
-- Do NOT exceed 120–180 words.
+        let workExperienceDescription = result;
 
-INPUT:
-Job Role: ${jobRole}
-Experience Level: ${experienceLevel}
-Years of Experience: ${yearOfExperience}
-Tech Stack: ${techStack.join(", ")}
-
-OUTPUT:
-Return only the work experience description.
-`;
-
-        const result = await generateAiContent(prompt)
-
-        const workExperience = result
 
         return NextResponse.json<ApiResponse>({
-            success: true,
-            message:"workExperience created",
-            data:{
-                workExperience
+            success: true, message: "workExperienceDescription created", data: {
+                workExperienceDescription
             }
-        },{
+        }, {
             status: 201
         })
-    } catch (err) {
-        console.log('error in creating workExperience', err)
-        return NextResponse.json<ApiResponse>({
-            success: false,
-            message: "something went wrong",
-        }, {
-            status: 500
-        })
+
+    } catch (error) {
+        console.log("error in workExperienceDescription generation api", error);
+        return NextResponse.json<ApiResponse>(
+            {
+                success: false,
+                message: "Something went wrong",
+            },
+            { status: 500 }
+        );
     }
 }

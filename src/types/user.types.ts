@@ -1,26 +1,28 @@
-export interface IUser{
+export interface IUser {
     _id: string,
     name: string,
     email: string,
     password: string,
-    mobile: string,
+    mobile: string
     createdAt?: Date,
-    updatedAt?: Date,
+    updatedAt?: Date
+
 }
 
-export interface RegisterBody{
+export interface RegisterBody {
     name: string,
     email: string,
     password: string,
-    mobile: string,
+    mobile: string
 }
 
-export interface LoginBody{
+export interface LoginBody {
     email: string,
     password: string,
 }
 
-export interface JWTPayload{
+export interface JWTPayload {
     userId: string,
     email?: string
+
 }

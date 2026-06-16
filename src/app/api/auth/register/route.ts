@@ -1,76 +1,66 @@
 import { generateToken } from "@/lib/jwt"
 import { connectDB } from "@/lib/mongodb"
-import userModel from "@/models/User.model"
+import UserModel from "@/models/User.model"
+import { ApiResponse } from "@/types/api.types"
 import { RegisterBody } from "@/types/user.types"
 import { NextRequest, NextResponse } from "next/server"
 
-export async function POST(req: NextRequest){
-    try{
+export async function POST(req: NextRequest) {
+    try {
 
         await connectDB()
 
-        const body:RegisterBody = await req.json()
+        let body: RegisterBody = await req.json()
 
-        const {name , email, mobile, password} = body
+        let { name, email, mobile, password } = body;
 
-        if(!name || !email || !password){
+        if (!name || !email || !password) {
             return NextResponse.json<ApiResponse>({
-                success: false,
-                message: 'all fields are required..'
-            },{
+                success: false, message: "All fields are required",
+            }, {
                 status: 400
             })
-        }
+        };
 
-        const isExisted = await userModel.findOne({email})
+        let isExisted = await UserModel.findOne({ email })
 
-        if(isExisted){
-             return NextResponse.json<ApiResponse>({
-                success: false,
-                message: 'user already exists'
-            },{
-                status: 409
-            })
-        }
-
-        const newUser = await userModel.create({
-            name , email , mobile , password
+        if (isExisted) return NextResponse.json<ApiResponse>({
+            success: false, message: "User already exists",
+        }, {
+            status: 409
         })
 
-        const token = generateToken({
-            userId: newUser._id.toString(),
+        let newUser = await UserModel.create({
+            name, email, password, mobile
         })
 
-        const response = NextResponse.json<ApiResponse>({
-            success: true,
-            message: 'user registered successfully.',
-            data:{
-                user:{
+        let token = generateToken({ userId: newUser._id.toString() })
+
+        let response = NextResponse.json<ApiResponse>({
+            success: true, message: "User registered successfully", data: {
+                user: {
                     _id: newUser._id,
                     name: newUser.name,
                     email: newUser.email
                 }
             }
-        },{
-            status: 201
-        })
+        }, { status: 201 })
 
-        response.cookies.set('token', token,{
+        response.cookies.set('token', token, {
             httpOnly: true,
             sameSite: 'lax',
             maxAge: 60 * 60 * 1000
         })
+
         return response
-    }catch(error){
-        console.log("error in register api",error)
+
+    } catch (error) {
+        console.log("error in register api", error)
         return NextResponse.json<ApiResponse>({
-            message: "something went wrong",
-            success: false,
-            error:{
+            success: false, message: "Something went wrong", error: {
                 error
             }
-        },{
-            status: 500
-        })
+        }, { status: 500 })
     }
+
 }
